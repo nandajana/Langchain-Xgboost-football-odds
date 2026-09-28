@@ -9,22 +9,6 @@ team news. A Flask web UI lets you type a matchup in plain English (e.g.
 
 Runs entirely on a laptop. No paid API required.
 
-## Why it's built this way
-
-The prediction itself is a trained **XGBoost classifier**, not an LLM guess.
-Asking a language model to just state a win probability from memory or
-vibes produces a plausible-sounding but ungrounded number. Here, the model
-computes real probabilities from real features, and the LLM's only jobs are:
-
-1. Estimating structured input features (rough strength, form, goals) from
-   retrieved web text — a bounded task with a defined output range
-2. Narrating the model's already-computed prediction in natural language
-
-**The LLM never decides which team wins.** That comparison is done in plain
-Python (`max(prediction, key=...)`). This was a real bug caught during
-development: a small local model, when asked to summarize its own numbers
-in prose, misread which probability was actually higher and named the wrong
-team as favorite. Moving that decision into code fixed it permanently.
 
 <img width="1774" height="887" alt="image" src="https://github.com/user-attachments/assets/aced3ad5-e3be-4534-8377-5822f9012c28" />
 
