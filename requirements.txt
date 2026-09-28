@@ -1,0 +1,13 @@
+pandas
+numpy
+scikit-learn
+xgboost
+joblib
+ddgs
+requests
+beautifulsoup4
+lxml
+langchain
+langchain-community
+langchain-ollama
+flask
