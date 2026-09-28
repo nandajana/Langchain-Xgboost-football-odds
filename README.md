@@ -26,35 +26,8 @@ development: a small local model, when asked to summarize its own numbers
 in prose, misread which probability was actually higher and named the wrong
 team as favorite. Moving that decision into code fixed it permanently.
 
-```
-                                   ┌─────────────────────────┐
-                                   │   data/matches.csv       │
-                                   │  (synthetic, 3000 rows)  │
-                                   └────────────┬─────────────┘
-                                                │
-                                                ▼
-                                   ┌─────────────────────────┐
-                                   │   train_model.py          │
-                                   │   XGBoost classifier      │
-                                   │   → models/*.joblib       │
-                                   └────────────┬─────────────┘
-                                                │
-   "Arsenal vs Barcelona,          ┌────────────▼─────────────┐
-    who wins?"          ─────────▶│   query_predictor.py      │
-                                   │  1. parse team names      │
-                                   │  2. web_search.py         │
-                                   │     (DuckDuckGo + fetch)  │
-                                   │  3. Ollama estimates       │
-                                   │     input features        │
-                                   │  4. XGBoost predicts       │
-                                   │     real probabilities     │
-                                   │  5. Python picks winner    │
-                                   │     (never the LLM)        │
-                                   └────────────┬─────────────┘
-                                                │
-                                                ▼
-                                   "Arsenal — 58%"
-```
+<img width="1774" height="887" alt="image" src="https://github.com/user-attachments/assets/aced3ad5-e3be-4534-8377-5822f9012c28" />
+
 
 ## Stack
 
@@ -68,7 +41,7 @@ team as favorite. Moving that decision into code fixed it permanently.
 | Retrieval | `TFIDFRetriever` (LangChain) | Lightweight keyword retrieval, no embedding model / GPU needed |
 | Web UI | Flask | Minimal local server, one form, one result page |
 
-## Quickstart
+## Setup
 
 ```bash
 python3 -m venv venv
@@ -93,7 +66,7 @@ python3 app.py
 # then open http://127.0.0.1:5000
 ```
 
-## Project structure
+## Structure
 
 ```
 data/generate_sample_data.py   synthetic match dataset (swap for real data later)
@@ -106,25 +79,11 @@ src/query_predictor.py         full pipeline: NL query → point answer
 app.py                         Flask web UI
 ```
 
-## Current state: synthetic data
 
-The dataset generator creates a realistic but **synthetic** dataset
-(≈43% home win / 24% draw / 33% away win, similar to real football) so the
-whole pipeline runs immediately without needing a data source. Model
-accuracy on this data is ~46%, which is genuinely in the same range as real
-bookmaker-grade models — football is hard to predict much above 50-55%
-even with rich, real data.
 
-### Known limitation: home-venue feature
 
-Match venue (whether a team is playing at its actual home stadium vs. a
-neutral venue like a cup final) is modeled as a binary `true_home_venue`
-feature that boosts a team's effective strength when true. It doesn't
-encode specific stadiums, cities, or travel effects — just whether the home
-advantage applies at all.
 
-## Plugging in real data
-
+## Data Useage
 Replace the synthetic CSV with real data and use `src/features.py`'s
 functions to derive matching columns from raw results. Suggested sources:
 
@@ -134,19 +93,3 @@ functions to derive matching columns from raw results. Suggested sources:
   betting sites directly; most prohibit it and have anti-bot protection
 - **FIFA/game ratings:** Kaggle datasets derived from sofifa.com
 
-## Honest limitations
-
-- **Feature estimation from search text is approximate.** The local LLM
-  reads news snippets and estimates numeric signals (form, strength,
-  injury impact) — it's a reasonable-effort estimate, not a verified stat.
-- **Small local models can misread numbers in prose**, which is why the
-  winner is always determined in Python, never asked of the LLM directly.
-- **DuckDuckGo's free search has no official API** and can rate-limit under
-  heavy use. Fine for development/demo use.
-- **This is not betting-grade output.** Treat the point answer as a
-  directional estimate for a portfolio project, not a real forecasting
-  system — real odds models use far richer, verified structured data.
-
-## License
-
-MIT (or your choice — add a LICENSE file)
